@@ -24,6 +24,26 @@ End-to-End Behavioral Cloning has been attempted by several research teams befor
 
 The model begins with a normalization layer implemented as a Keras Lambda layer. I added a Cropping2D layer after the normalization layer in an effort to remove irrelevant data and further decrease training time. The model continues as a convolution neural network with 3 convolutional layers with 8x8, 5x5, and 5x5 kernel sizes, respectively. These layers are followed by only two fully connected layers, the first with 512 neurons, and the second is the output layer, with just a single output neuron for the predicted steering angle. All activation layers use the exponential linear unit (ELU) activation function. A 20% dropout rate is added after the final convolutional layer and a 50% dropout rate is added after the first fully connected layer. Finally, the loss function used is mean squared error (MSE).
 
+The full Keras definition is found in model.py and repeated here:
+
+```python
+model = Sequential()
+model.add(Lambda(lambda x: x / 127.5 - 1, input_shape=(160,320,3)))
+model.add(Cropping2D(cropping=((75,25), (0,0))))
+model.add(Conv2D(16, kernel_size=(8, 8), strides=(4, 4), padding="same"))
+model.add(ELU())
+model.add(Conv2D(32, kernel_size=(5, 5), strides=(2, 2), padding="same"))
+model.add(ELU())
+model.add(Conv2D(64, kernel_size=(5, 5), strides=(2, 2), padding="same"))
+model.add(Flatten())
+model.add(Dropout(.2))
+model.add(ELU())
+model.add(Dense(512))
+model.add(Dropout(.5))
+model.add(ELU())
+model.add(Dense(1))
+```
+
 
 #### 2. Attempts to reduce overfitting in the model
 
