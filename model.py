@@ -104,11 +104,11 @@ if __name__ == "__main__":
         model = Sequential()
         model.add(Lambda(lambda x: x / 127.5 - 1, input_shape=(160,320,3)))
         model.add(Cropping2D(cropping=((75,25), (0,0))))
-        model.add(Conv2D(16, 8, 8, stride=(4, 4), padding="same"))
+        model.add(Conv2D(16, kernel_size=(8, 8), strides=(4, 4), padding="same"))
         model.add(ELU())
-        model.add(Conv2D(32, 5, 5, stride=(2, 2), padding="same"))
+        model.add(Conv2D(32, kernel_size=(5, 5), strides=(2, 2), padding="same"))
         model.add(ELU())
-        model.add(Conv2D(64, 5, 5, stride=(2, 2), padding="same"))
+        model.add(Conv2D(64, kernel_size=(5, 5), strides=(2, 2), padding="same"))
         model.add(Flatten())
         model.add(Dropout(.2))
         model.add(ELU())
@@ -118,8 +118,8 @@ if __name__ == "__main__":
         model.add(Dense(1))
     
         # Compile and train
-        model.compile(optimizer="adam", loss="mse")
-        model.fit(X_train, y_train, validation_split=0.2, shuffle=True, epochs=7)
+#        model.compile(optimizer="adam", loss="mse")
+#        model.fit(X_train, y_train, validation_split=0.2, shuffle=True, epochs=7)
         
         
-        model.save('model.h5')
+#        model.save('model.h5')
