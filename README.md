@@ -1,10 +1,8 @@
 # Behaviorial Cloning
 
-The Project
----
 The goals / steps of this project are the following:
 * Use a driving simulator to collect data of good driving behavior 
-* Train and validate a model that predicts a steering angle from image data
+* Train and validate a convolutional neural network that predicts a steering angle from image data
 * Use the model to drive the vehicle autonomously around the track in the simulator
 
 
@@ -15,17 +13,14 @@ The goals / steps of this project are the following:
 [original]: ./image/original_data_histogram.png "Histogram of original data"
 [final]: ./image/after_data_augmentation.png "After Data Augmentation"
 [center]: ./image/center.jpg "Example Image from Car Center Camera"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
 
+---
 
 ### Model Architecture
 
 #### 1. Choosing an architecture
 
-End-to-End Behavioral Cloning has been attempted by several research teams before, and trying to implement an architecture on my own would be naive. Perhaps the most famous model was made by a team at NVIDIA. Their [results](https://arxiv.org/pdf/1604.07316.pdf) show great results for their model, but there is one problem: it is too large. I needed to train my model on a CPU, but given the size of their model, it would have taken way too long. I found a couple other similar models, and finally settled on [this one](https://github.com/commaai/research) made by comma.ai. It is significantly smaller than the NVIDIA model, and appeared to be just as effective.
+End-to-End Behavioral Cloning has been attempted by several research teams before, and trying to implement an architecture on my own would be naive. Perhaps the most famous model was made by a team at NVIDIA. Their [results](https://arxiv.org/pdf/1604.07316.pdf) show great performance from their model, but there is one problem: it is too large. I needed to train my model on a CPU, but given the size of their model, it would have taken way too long. I found a couple other similar models, and finally settled on [this one](https://github.com/commaai/research) made by comma.ai. It is significantly smaller than the NVIDIA model, and appeared to be just as effective.
 
 The model begins with a normalization layer implemented as a Keras Lambda layer. I added a Cropping2D layer after the normalization layer in an effort to remove irrelevant data and further decrease training time. The model continues as a convolution neural network with 3 convolutional layers with 8x8, 5x5, and 5x5 kernel sizes, respectively. These layers are followed by only two fully connected layers, the first with 512 neurons, and the second is the output layer, with just a single output neuron for the predicted steering angle. All activation layers use the exponential linear unit (ELU) activation function. A 20% dropout rate is added after the final convolutional layer and a 50% dropout rate is added after the first fully connected layer. Finally, the loss function used is mean squared error (MSE).
 
@@ -48,6 +43,8 @@ Training data was chosen to keep the vehicle driving on the road. A large majori
 
 For details about how I refined the training data, see the next section. 
 
+---
+
 ### Model Training Strategy
 
 #### 1. Solution Design Approach
@@ -60,12 +57,12 @@ Seeing this histogram made it quite obvious why the car had a tendency to drive 
 
 ![alt_text][final]
 
-After this, the model performed very well! A video of a full lap can be found [here](./run.mp4) It still struggled on the challenge track a bit; the straight bias was still a little too high for some of the sharp turns and it could not complete a full lap. Further, I took no training data from the challenge track, so the different textures may have come into play. Regardless, I found it very impressive that the model could perform so well on only ~8000 test images. Further refinement of the data, and possibly adding more data, certainly some from the challenge track, would be necessary to complete a full lap on the challenge track.
+After this, the model performed very well! A video of a full lap can be found [here](./run.mp4). It still struggled on the challenge track a bit; the straight bias was still a little too high for some of the sharp turns and it could not complete a full lap. Further, I took no training data from the challenge track, so the different textures may have come into play. Regardless, I found it very impressive that the model could perform so well on only ~8000 test images. Further refinement of the data, and possibly adding more data, certainly some from the challenge track, would be necessary to complete a full lap on the challenge track.
 
 
 #### 2. Final Model Architecture
 The same as what I started with. To achieve better performance, I only modified the data.
 
 #### 3. Result
-See a recorded video [here](./run.mp4)
+See a recorded video [here](./run.mp4).
 
