@@ -1,125 +1,71 @@
-# Behaviorial Cloning Project
-
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
-
-Overview
----
-This repository contains starting files for the Behavioral Cloning Project.
-
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to clone driving behavior. You will train, validate and test a model using Keras. The model will output a steering angle to an autonomous vehicle.
-
-We have provided a simulator where you can steer a car around a track for data collection. You'll use image data and steering angles to train a neural network and then use this model to drive the car autonomously around the track.
-
-We also want you to create a detailed writeup of the project. Check out the [writeup template](https://github.com/udacity/CarND-Behavioral-Cloning-P3/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup. The writeup can be either a markdown file or a pdf document.
-
-To meet specifications, the project will require submitting five files: 
-* model.py (script used to create and train the model)
-* drive.py (script to drive the car - feel free to modify this file)
-* model.h5 (a trained Keras model)
-* a report writeup file (either markdown or pdf)
-* video.mp4 (a video recording of your vehicle driving autonomously around the track for at least one full lap)
-
-This README file describes how to output the video in the "Details About Files In This Directory" section.
-
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/432/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
+# Behaviorial Cloning
 
 The Project
 ---
 The goals / steps of this project are the following:
-* Use the simulator to collect data of good driving behavior 
-* Design, train and validate a model that predicts a steering angle from image data
-* Use the model to drive the vehicle autonomously around the first track in the simulator. The vehicle should remain on the road for an entire loop around the track.
-* Summarize the results with a written report
+* Use a driving simulator to collect data of good driving behavior 
+* Train and validate a model that predicts a steering angle from image data
+* Use the model to drive the vehicle autonomously around the track in the simulator
 
-### Dependencies
-This lab requires:
 
-* [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit)
 
-The lab enviroment can be created with CarND Term1 Starter Kit. Click [here](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) for the details.
 
-The following resources can be found in this github repository:
-* drive.py
-* video.py
-* writeup_template.md
+[//]: # (Image References)
 
-The simulator can be downloaded from the classroom. In the classroom, we have also provided sample data that you can optionally use to help train your model.
+[original]: ./image/original_data_histogram.png "Histogram of original data"
+[final]: ./image/after_data_augmentation.png "After Data Augmentation"
+[center]: ./image/center.jpg "Example Image from Car Center Camera"
+[image4]: ./examples/placeholder_small.png "Recovery Image"
+[image5]: ./examples/placeholder_small.png "Recovery Image"
+[image6]: ./examples/placeholder_small.png "Normal Image"
+[image7]: ./examples/placeholder_small.png "Flipped Image"
 
-## Details About Files In This Directory
 
-### `drive.py`
+### Model Architecture
 
-Usage of `drive.py` requires you have saved the trained model as an h5 file, i.e. `model.h5`. See the [Keras documentation](https://keras.io/getting-started/faq/#how-can-i-save-a-keras-model) for how to create this file using the following command:
-```sh
-model.save(filepath)
-```
+#### 1. Choosing an architecture
 
-Once the model has been saved, it can be used with drive.py using this command:
+End-to-End Behavioral Cloning has been attempted by several research teams before, and trying to implement an architecture on my own would be naive. Perhaps the most famous model was made by a team at NVIDIA. Their [results](https://arxiv.org/pdf/1604.07316.pdf) show great results for their model, but there is one problem: it is too large. I needed to train my model on a CPU, but given the size of their model, it would have taken way too long. I found a couple other similar models, and finally settled on [this one](https://github.com/commaai/research) made by comma.ai. It is significantly smaller than the NVIDIA model, and appeared to be just as effective.
 
-```sh
-python drive.py model.h5
-```
+The model begins with a normalization layer implemented as a Keras Lambda layer. I added a Cropping2D layer after the normalization layer in an effort to remove irrelevant data and further decrease training time. The model continues as a convolution neural network with 3 convolutional layers with 8x8, 5x5, and 5x5 kernel sizes, respectively. These layers are followed by only two fully connected layers, the first with 512 neurons, and the second is the output layer, with just a single output neuron for the predicted steering angle. All activation layers use the exponential linear unit (ELU) activation function. A 20% dropout rate is added after the final convolutional layer and a 50% dropout rate is added after the first fully connected layer. Finally, the loss function used is mean squared error (MSE).
 
-The above command will load the trained model and use the model to make predictions on individual images in real-time and send the predicted angle back to the server via a websocket connection.
 
-Note: There is known local system's setting issue with replacing "," with "." when using drive.py. When this happens it can make predicted steering values clipped to max/min values. If this occurs, a known fix for this is to add "export LANG=en_US.utf8" to the bashrc file.
+#### 2. Attempts to reduce overfitting in the model
 
-#### Saving a video of the autonomous agent
+As discussed previously, the model contains two dropout layers in order to reduce overfitting. 
 
-```sh
-python drive.py model.h5 run1
-```
+The data was split 80/20 for train/validation to ensure that the model was not overfitting. Training output showed a marginally higher mean squared error on the validation set, which is to be expected. Both the training and validation loss decreased throughout training, for 7 epochs. The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
-The fourth argument, `run1`, is the directory in which to save the images seen by the agent. If the directory already exists, it'll be overwritten.
+#### 3. Model parameter tuning
 
-```sh
-ls run1
+The model used an adam optimizer, so the learning rate was not tuned manually.
 
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_424.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_451.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_477.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_528.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_573.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_618.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_697.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_723.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_749.jpg
-[2017-01-09 16:10:23 EST]  12KiB 2017_01_09_21_10_23_817.jpg
-...
-```
+#### 4. Appropriate training data
 
-The image file name is a timestamp of when the image was seen. This information is used by `video.py` to create a chronological video of the agent driving.
+Training data was chosen to keep the vehicle driving on the road. A large majority of the data I used was just the default data that came with the simulator. After a few runs, I added some training data of me driving around only the sharp turns 3-4 times. I only used the center camera images from the default data and my own training data. An example image from data I took on a sharp turn from the center camera:
 
-### `video.py`
+![alt_text][center]
 
-```sh
-python video.py run1
-```
+For details about how I refined the training data, see the next section. 
 
-Creates a video based on images found in the `run1` directory. The name of the video will be the name of the directory followed by `'.mp4'`, so, in this case the video will be `run1.mp4`.
+### Model Training Strategy
 
-Optionally, one can specify the FPS (frames per second) of the video:
+#### 1. Solution Design Approach
 
-```sh
-python video.py run1 --fps 48
-```
+My first step was to the model described above and train it on the default data, without capturing anymore data. The first run went surprisingly well, but the car eventually drove off the raod because it did not turn sharp enough. It appeared to have a bias toward driving straight. So I took a histogram of the data to see what values I was working with, and got this result:
 
-Will run the video at 48 FPS. The default FPS is 60.
+![alt_text][original]
 
-#### Why create a video
+Seeing this histogram made it quite obvious why the car had a tendency to drive straight. At this point, I collected more data only on the sharp turns. I did this several times, re-training each time. This gradually increased the training time with only a marginal improvement each time. At this point, instead of deciding to add more data, I decided to throw out data I didn't want and augment the data that I did. I added a quick check in my function that loads images: if the absolute value of the steering measurement was less than 0.05, the assocaited image was given a 50% chance of being thrown out. If it was greater than 0.05, it was given an 80% to be copied into the training set again, but left-right flipped and with the steering angle multiplied by -1. This technique allowed me to increase the instances of turns in my data while decreasing the instances of straight driving. After gathering the data again, the distribution looked much more realistic:
 
-1. It's been noted the simulator might perform differently based on the hardware. So if your model drives succesfully on your machine it might not on another machine (your reviewer). Saving a video is a solid backup in case this happens.
-2. You could slightly alter the code in `drive.py` and/or `video.py` to create a video of what your model sees after the image is processed (may be helpful for debugging).
+![alt_text][final]
 
-### Tips
-- Please keep in mind that training images are loaded in BGR colorspace using cv2 while drive.py load images in RGB to predict the steering angles.
+After this, the model performed very well! A video of a full lap can be found [here](./run.mp4) It still struggled on the challenge track a bit; the straight bias was still a little too high for some of the sharp turns and it could not complete a full lap. Further, I took no training data from the challenge track, so the different textures may have come into play. Regardless, I found it very impressive that the model could perform so well on only ~8000 test images. Further refinement of the data, and possibly adding more data, certainly some from the challenge track, would be necessary to complete a full lap on the challenge track.
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+
+#### 2. Final Model Architecture
+The same as what I started with. To achieve better performance, I only modified the data.
+
+#### 3. Result
+See a recorded video [here](./run.mp4)
 
